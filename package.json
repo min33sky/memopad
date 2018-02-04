@@ -1,0 +1,24 @@
+{
+  "name": "create-react-app-express",
+  "version": "1.0.0",
+  "description": "Example on using create-react-app with a Node Express Backend",
+  "author": {
+    "name": "Minhyung Heo",
+    "email": "min33sky@naver.com",
+    "url": "https://github.com/min33sky"
+  },
+  "license": "MIT",
+  "scripts": {
+    "client": "cd client && yarn start",
+    "server": "node ./server/scripts/nodemon.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+  },
+  "dependencies": {
+    "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "concurrently": "^3.5.1",
+    "nodemon": "^1.14.12"
+  }
+}
