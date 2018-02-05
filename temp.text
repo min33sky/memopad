@@ -1,0 +1,7 @@
+morgan: HTTP 요청을 로그하는 미들웨어
+
+body-parser: 요청에서 JSON을 파싱할때 사용되는 미들웨어
+
+mongoose: mongodb 데이터 모델링 툴; MongoDB 에 있는 데이터를 여러분의 Application에서 JavaScript 객체로 사용 할 수 있도록 해줍니다.
+
+express-session: express 에서 세션을 다룰 때 사용되는 미들웨어

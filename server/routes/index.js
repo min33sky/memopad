@@ -1,9 +1,9 @@
 import express from 'express';
+import account from './account';
+import memo from './memo';
 
 const router = express.Router();
-
-router.get('/hello', (req, res) => {
-    res.send({ express: 'Hello~! From Express :)'});
-});
+router.use('/account', account);
+router.use('/memo', memo);
 
 export default router;
