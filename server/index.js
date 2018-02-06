@@ -1,6 +1,7 @@
 import express from 'express';
 import morgan from 'morgan';    // HTTP Request Logger
 import bodyParser from 'body-parser';   // Parse HTML Body
+import path from 'path';
 
 import mongoose from 'mongoose';    // MongoDB 데이터 모델링 툴
 import session from 'express-session';  // Express session
@@ -29,12 +30,17 @@ app.use(session({
 app.use(morgan('dev'));     // HTTP Request Log
 app.use(bodyParser.json()); // HTTP Body parser
 
-
-app.use('/', express.static(`${__dirname}/../../client/build`));
+// Serve static files from the React app
+app.use('/', express.static(`${__dirname}/../client/build`));
 
 // setup routers & static directory
 app.use('/api', api);
 
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/../client/build/index.html'));
+});
 
 // Handle Error
 app.use(function (err, req, res, next) {
