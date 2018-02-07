@@ -7,7 +7,7 @@ import registerServiceWorker from './registerServiceWorker';
 
 const Root = () => (
     <App>
-        <Router>
+        <Router basename={process.env.PUBLIC_URL}>
             <Switch>
                 <Route exact path="/" component={Home} />
                 <Route path="/home" component={Home} />

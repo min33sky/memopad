@@ -7,9 +7,9 @@ class Header extends Component {
 
         const loginButton = (
             <li>
-                <a>
+                <Link to="/login">
                     <i className="material-icons">vpn_key</i>
-                </a>
+                </Link>
             </li>
         );
 
@@ -24,7 +24,7 @@ class Header extends Component {
         return (
             <nav>
                 <div className="nav-wrapper indigo darken-1">
-                    <div><Link to="/" className="brand-logo center">MEMOPAD</Link></div>
+                    <Link to="/" className="brand-logo center">MEMOPAD</Link>
 
                     <ul>
                         <li><a><i className="material-icons">search</i></a></li>
