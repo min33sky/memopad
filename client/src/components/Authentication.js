@@ -7,9 +7,42 @@ import './Authentication.css';
  * 인증 관련 컴포넌트 (로그인, 회원가입)
  */
 class Authentication extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            username: '',
+            password: ''
+        }
+    }
+
+    handleChange = (e) => {
+        let nextState = {};
+        nextState[e.target.name] = e.target.value;
+        this.setState(nextState);
+    }
+
+    handleLogin = () => {
+        let id = this.state.username;
+        let pw = this.state.password;
+
+        this.props.onLogin(id, pw).then(
+            (success) => {
+                if(!success) {
+                    this.setState({
+                        password: ''
+                    });
+                }
+            }
+        )
+    }
+
     render() {
 
         const { mode } = this.props;
+        const { username, password } = this.state;
+        const { handleChange, handleLogin } = this;
+
 
         const inputBoxes = (
             <div>
@@ -18,14 +51,20 @@ class Authentication extends Component {
                     <input
                     name="username"
                     type="text"
-                    className="validate"/>
+                    className="validate"
+                    onChange={handleChange}
+                    value={username}
+                    />
                 </div>
                 <div className="input-field col s12">
                     <label>Password</label>
                     <input
                     name="password"
                     type="password"
-                    className="validate"/>
+                    className="validate"
+                    onChange={handleChange}
+                    value={password}
+                    />
                 </div>
             </div>
         );
@@ -35,7 +74,8 @@ class Authentication extends Component {
                 <div className="card-content">
                     <div className="row">
                         { inputBoxes }
-                        <a className="waves-effect waves-light btn">SUBMIT</a>
+                        <a className="waves-effect waves-light btn"
+                            onClick={handleLogin}>SUBMIT</a>
                     </div>
                 </div>
 

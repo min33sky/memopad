@@ -1,4 +1,4 @@
-# create-react-app React Project with Node Express Backend(ES6)
+# React & Express로 메모장 만들기
 
 > Example on using create-react-app with a Node Express Backend(ES6)
 
