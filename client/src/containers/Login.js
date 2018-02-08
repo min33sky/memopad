@@ -3,9 +3,13 @@ import { Authentication } from '../components';
 import { connect } from 'react-redux';
 import { loginRequest } from '../actions/authentication';
 
+const $ = window.$;
+const Materialize = window.Materialize;
+
 class Login extends Component {
 
     handleLogin = (id, pw) => {
+        // return을 해야 authentication 컴포넌트로 true/false값을 넘겨서 authentication 컴포넌트에서 .then() 사용이 가능
         return this.props.loginRequest(id, pw).then(
             () => {
                 if(this.props.status === 'SUCCESS') {
@@ -15,14 +19,17 @@ class Login extends Component {
                         username: id
                     };
 
+                    // btoa : base64 인코딩 함수
                     document.cookie = 'key=' + btoa(JSON.stringify(loginData));
 
-                    window.Materialize.toast('Welcome ' + id + '!', 2000);
+                    Materialize.toast('Welcome ' + id + '!', 2000);
+                    // 라우팅을 트리거(<Link>와 같은 효과)
                     this.props.history.push('/');
                     return true;
                 } else {
-                    // let $toastContent = $('<span style="color: #FFB4BA">Incorrect username or password</span>');
-                    window.Materialize.toast('Error', 2000);
+
+                    let $toastContent = $('<span style="color: #a5d8ff">Incorrect username or password</span>');
+                    Materialize.toast($toastContent, 2000);
                     return false;
 
                 }

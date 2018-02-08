@@ -16,18 +16,21 @@ class Authentication extends Component {
         }
     }
 
+    // 인풋창
     handleChange = (e) => {
         let nextState = {};
         nextState[e.target.name] = e.target.value;
         this.setState(nextState);
     }
 
+    // 로그인
     handleLogin = () => {
         let id = this.state.username;
         let pw = this.state.password;
 
         this.props.onLogin(id, pw).then(
             (success) => {
+                // 로그인 실패시 인풋창 초기화
                 if(!success) {
                     this.setState({
                         password: ''
@@ -37,11 +40,39 @@ class Authentication extends Component {
         )
     }
 
+    // 회원 가입
+    handleRegister = () => {
+        let id = this.state.username;
+        let pw = this.state.password;
+
+        this.props.onRegister(id, pw).then(
+            (result) => {
+                if(!result) {
+                    this.setState({
+                        username: '',
+                        password: ''
+                    });
+                }
+            }
+        )
+    }
+
+    // 엔터키 입력
+    handleKeyPress = (e) => {
+        if(e.key === 'Enter') {
+            if(this.props.mode) {
+                this.handleLogin();
+            } else {
+                this.handleRegister();
+            }
+        }
+    }
+
     render() {
 
         const { mode } = this.props;
         const { username, password } = this.state;
-        const { handleChange, handleLogin } = this;
+        const { handleChange, handleLogin, handleRegister, handleKeyPress } = this;
 
 
         const inputBoxes = (
@@ -63,6 +94,7 @@ class Authentication extends Component {
                     type="password"
                     className="validate"
                     onChange={handleChange}
+                    onKeyPress={handleKeyPress}
                     value={password}
                     />
                 </div>
@@ -93,7 +125,8 @@ class Authentication extends Component {
             <div className="card-content">
                 <div className="row">
                     { inputBoxes }
-                    <a className="waves-effect waves-light btn">CREATE</a>
+                    <a className="waves-effect waves-light btn"
+                        onClick={handleRegister}>CREATE</a>
                 </div>
             </div>
         );
