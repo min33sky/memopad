@@ -1,3 +1,8 @@
+// ************************************************************************
+// 인증 관련 액션
+// ************************************************************************
+
+
 // AUTHENTICATION - LOGIN
 
 export const AUTH_LOGIN = "AUTH_LOGIN";
@@ -17,3 +22,14 @@ export const AUTH_GET_STATUS_FAILURE = "AUTH_GET_STATUS_FAILURE";
 
 // AUTHENTICATION - LOGOUT
 export const AUTH_LOGOUT = "AUTH_LOGOUT";
+
+// ************************************************************************
+// 메모 관련 액션
+// ************************************************************************
+
+export const MEMO_POST = "MEMO_POST";
+export const MEMO_POST_SUCCESS = "MEMO_POST_SUCCESS";
+export const MEMO_POST_FAILURE = "MEMO_POST_FAILURE";
+
+
+
