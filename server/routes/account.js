@@ -4,6 +4,7 @@ import Account from '../models/account';
 const router = express.Router();
 
 /*
+    회원가입
     ACCOUNT SIGNUP: POST /api/account/signup
     BODY SAMPLE: { "username": "test", "password": "test" }
     ERROR CODES:
@@ -59,12 +60,14 @@ router.post('/signup', (req, res) => {
 });
 
 /*
+    로그인
     ACCOUNT SIGNIN: POST /api/account/signin
     BODY SAMPLE: { "username": "test", "password": "test" }
     ERROR CODES:
         1: LOGIN FAILED
 */
 router.post('/signin', (req, res) => {
+
 
     if(typeof req.body.password !== 'string') {
         return res.status(401).json({
@@ -77,9 +80,13 @@ router.post('/signin', (req, res) => {
     Account.findOne({ username: req.body.username }, (err, account) => {
         if(err) throw err;
 
+        console.log("ggggggggggggg");
+
+
         // CHECK ACCOUNT EXISTANCY
         if(!account) {
-            return res.json(401).json({
+            console.log("===== 해당 계정이 없다 =====");
+            return res.status(401).json({
                 error: "LOGIN FAILED",
                 code: 1
             });

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import Header from '../components/Header';
+import { Header, Write } from '../components';
 import { connect } from 'react-redux';
 import { logoutRequest } from '../actions/authentication';
+
 
 const Materialize = window.Materialize;
 
@@ -23,10 +24,13 @@ class Home extends Component {
     }
 
     render() {
+
+        const write = (<Write />);
+
         return (
             <div>
                 <Header isLoggedIn={this.props.isLoggedIn} onLogout={this.handleLogout}/>
-                Home
+                {this.props.isLoggedIn ? write : undefined }
             </div>
         );
     }
