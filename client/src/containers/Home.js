@@ -1,14 +1,24 @@
 import React, { Component } from 'react';
-import { Header, Write } from '../components';
+import { Header, Write, MemoList } from '../components';
 import { connect } from 'react-redux';
 import { logoutRequest } from '../actions/authentication';
-import { memoPostRequest } from '../actions/memo';
+import { memoPostRequest, memoListRequest } from '../actions/memo';
 import './Home.css';
 
 const Materialize = window.Materialize;
 const $ = window.$;
 
 class Home extends Component {
+
+    // 컴포넌트 마운트되기 전에 글 목록 불러오기
+    componentDidMount() {
+        this.props.memoListRequest(true).then(
+            () => {
+                console.log('메모 데이터 : ',this.props.memoData.toJS().data);
+            }
+        )
+    }
+
 
     // 로그아웃
     handleLogout = () => {
@@ -25,6 +35,7 @@ class Home extends Component {
                 document.cookie = 'key=' + btoa(JSON.stringify(loginData));
             });
     }
+
 
     // 메모 쓰기
     handlePost = (contents) => {
@@ -64,6 +75,8 @@ class Home extends Component {
 
     render() {
 
+        const { data } = this.props.memoData.toJS();
+
         const write = (<Write onPost={this.handlePost}/>);
 
         return (
@@ -71,6 +84,7 @@ class Home extends Component {
                 <Header isLoggedIn={this.props.isLoggedIn} onLogout={this.handleLogout} />
                 <div className="wrapper">
                     {this.props.isLoggedIn ? write : undefined}
+                    <MemoList data={data} currentUser={this.props.currentUser} />
                 </div>
             </div>
         );
@@ -80,7 +94,9 @@ class Home extends Component {
 const mapStateToProps = (state) => {
     return {
         isLoggedIn: state.authentication.getIn(['status', 'isLoggedIn']),
-        postStatus: state.memo.get('post')
+        postStatus: state.memo.get('post'),
+        currentUser: state.authentication.getIn(['status', 'currentUser']),
+        memoData: state.memo.get('memoList')
     }
 }
 
@@ -91,6 +107,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         memoPostRequest: (contents) => {
             return dispatch(memoPostRequest(contents));
+        },
+        memoListRequest: (isInitial, listType, id, username) => {
+            return dispatch(memoListRequest(isInitial, listType, id, username));
         }
     }
 }

@@ -13,7 +13,6 @@ class App extends Component {
    */
   componentDidMount() {
 
-    console.log('cookie ===> ', document.cookie);
 
     // GET COOKIE BY NAME
     function getCookie(name) {
@@ -26,7 +25,6 @@ class App extends Component {
     // get LoginData from cookie
     let loginData = getCookie('key');
 
-    console.log('loginData ==> ', loginData);
 
     // if LoginData is undefined, do nothing
     if(typeof loginData === 'undefined') return;
@@ -42,7 +40,7 @@ class App extends Component {
     // check whether this cookie is valid or not
     this.props.getStatusRequest().then(
       () => {
-        console.log(this.props.status);
+        // console.log(this.props.status);
 
         // if session is not valid
         if(!this.props.status.get('valid')) {
