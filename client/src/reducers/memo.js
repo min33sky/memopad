@@ -36,13 +36,56 @@ export default function memo(state = initialState, action) {
             return state.setIn(['memoList', 'status'], 'WAITING');
 
         case types.MEMO_LIST_SUCCESS:
+
+            const data = state.getIn(['memoList', 'data']);
+
             if(action.isInitial) {
                 return state.setIn(['memoList', 'status'], 'SUCCESS')
                             .setIn(['memoList', 'data'], action.data)
                             .setIn(['memoList', 'isLast'], action.data.length < 6);
-            }
+            } else {
 
-            return state;
+                if(action.listType === 'new') {
+
+                    // console.log('action.data ===>', action.data[0]._id);
+                    // console.log('reducer.data ===>', data[0]._id);
+
+                    if(action.data.length !== 0){
+
+                        console.log('action data', action.data);
+                        let original = List(data).toArray();
+                        let oArr = [];
+                        // console.log('오리지나르:', original);
+                        for(var memo of original){
+                            oArr.push(memo._id);
+                        }
+
+                        let nArr = [];
+                        for(var i=0; i<action.data.length; i++){
+                            if(oArr.indexOf(action.data[i]._id) === -1) nArr.push(action.data[i]);
+                        }
+
+                        console.log("ㅋㅋㅋ: ", nArr);
+
+
+                        // console.log('뉴데이터===>', newerData.length);
+                        // if(newerData.length !== 0){
+                        //     newerData.map(e => data.unshift(e));
+                        // }
+
+                        // console.log('action.data', action.data);
+                        if(nArr.length !== 0){
+                            nArr.map(e => data.unshift(e));
+                        }
+                    }
+                    return state.setIn(['memoList', 'status'], 'SUCCESS');
+
+                } else {
+                    return state.setIn(['memoList', 'success'], 'SUCCESS')
+                                // .updateIn(['memoList', 'data'], list => list.push(action.data))
+                                // .setIn(['memoList', 'isLast'], action.data.length < 6);
+                }
+            }
 
         case types.MEMO_LIST_FAILURE:
             return state.setIn(['memoList', 'status'], 'FAILURE');

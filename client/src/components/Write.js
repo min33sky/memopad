@@ -8,7 +8,8 @@ class Write extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            contents: ''
+            contents: '',
+            active: true
         }
     }
 
@@ -19,12 +20,18 @@ class Write extends Component {
     }
 
     handlePost = () => {
+
+        this.setState({
+            active: false
+        })
+
         let contents = this.state.contents;
 
         this.props.onPost(contents).then(
             () => {
                 this.setState({
-                    contents: ''
+                    contents: '',
+                    active: true
                 });
             }
         )
@@ -42,7 +49,7 @@ class Write extends Component {
                                 value={this.state.contents}/>
                     </div>
                     <div className="card-action">
-                        <a onClick={this.handlePost}>POST</a>
+                        { this.state.active ? (<a onClick={this.handlePost}>POST</a>) : (<a>POSTING...</a>) }
                     </div>
                 </div>
             </div>

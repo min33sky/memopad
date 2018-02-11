@@ -8,15 +8,54 @@ import './Home.css';
 const Materialize = window.Materialize;
 const $ = window.$;
 
+/**
+ * TODO
+ *
+ * 더블클릭으로 글 등록이되는걸 막자.
+ */
+
+
 class Home extends Component {
 
     // 컴포넌트 마운트되기 전에 글 목록 불러오기
     componentDidMount() {
+        // LOAD NEW MEMO EVERY 5 SECONDS
+        const loadMemoLoop = () => {
+            this.loadNewMemo().then(
+                () => {
+                    this.memoLoaderTimeoutId = setTimeout(loadMemoLoop, 5000);
+                }
+            );
+        };
+
         this.props.memoListRequest(true).then(
             () => {
-                console.log('메모 데이터 : ',this.props.memoData.toJS().data);
+                // BEGIN NEW MEMO LOADING LOOP
+                loadMemoLoop();
             }
-        )
+        );
+    }
+
+    componentWillUnmount() {
+        // STOPS THE loadMemoLoop
+        clearTimeout(this.memoLoaderTimeoutId);
+    }
+
+    loadNewMemo = () => {
+        // CANCEL IF THERE IS A PENDING REQUEST
+        if(this.props.listStatus === 'WAITING'){
+            console.log("================기 다 려=================");
+            return new Promise((resolve, reject) => {
+                resolve();
+            })
+        }
+
+        // IF PAGE IS EMPTY, DO THE INITIAL LOADING
+        if(this.props.memoData.get('data').length === 0)
+            return this.props.memoListRequest(true);
+
+        return this.props.memoListRequest(false, 'new', this.props.memoData.get('data')[0]._id);
+        // return this.props.memoListRequest(true);
     }
 
 
@@ -41,7 +80,10 @@ class Home extends Component {
     handlePost = (contents) => {
         return this.props.memoPostRequest(contents).then(() => {
             if(this.props.postStatus.get('status') === 'SUCCESS') {
-                Materialize.toast('Success!', 2000);
+                // TRIGGER LOAD NEW MEMO
+                this.loadNewMemo().then(() => {
+                    Materialize.toast('Success!', 2000);
+                });
             } else {
                 /*
                     ERROR CODES
@@ -96,7 +138,8 @@ const mapStateToProps = (state) => {
         isLoggedIn: state.authentication.getIn(['status', 'isLoggedIn']),
         postStatus: state.memo.get('post'),
         currentUser: state.authentication.getIn(['status', 'currentUser']),
-        memoData: state.memo.get('memoList')
+        memoData: state.memo.get('memoList'),
+        listStatus: state.memo.getIn(['memoList', 'status'])
     }
 }
 
