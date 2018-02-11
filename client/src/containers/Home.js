@@ -8,14 +8,15 @@ import './Home.css';
 const Materialize = window.Materialize;
 const $ = window.$;
 
-/**
- * TODO
- *
- * 더블클릭으로 글 등록이되는걸 막자.
- */
-
-
 class Home extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            loadingState: false
+        }
+    }
+
 
     // 컴포넌트 마운트되기 전에 글 목록 불러오기
     componentDidMount() {
@@ -28,19 +29,58 @@ class Home extends Component {
             );
         };
 
+        // 해상도가 클 때 스크롤바가 안나오는 경우를 대비
+        const loadUntilScrollable = () => {
+            // IF THE SCHROLLBAR DOES NOT EXIST,
+            if($('body').height() < $(window).height()) {
+                this.loadOldMemo().then(
+                    () => {
+                        // DO THIS RECURSIVELY UNLESS IT'S LAST PAGE
+                        if(!this.props.isLast){
+                            loadUntilScrollable();
+                        }
+                    }
+                )
+            }
+        }
+
         this.props.memoListRequest(true).then(
             () => {
+
+                loadUntilScrollable();
                 // BEGIN NEW MEMO LOADING LOOP
                 loadMemoLoop();
             }
         );
+
+        $(window).scroll(() => {
+            // WHEN HEIGHT UNDER SCROLLBOTTOM IS LESS THEN 250
+            if($(document).height() - $(window).height() - $(window).scrollTop() < 250) {
+                if(!this.state.loadingState) {
+                    this.loadOldMemo(); // 이전 메모를 불러온다.
+                    this.setState({
+                        loadingState: true
+                    });
+                }
+            } else {
+                if(this.state.loadingState) {
+                    this.setState({
+                        loadingState: false
+                    })
+                }
+            }
+        })
     }
 
     componentWillUnmount() {
         // STOPS THE loadMemoLoop
         clearTimeout(this.memoLoaderTimeoutId);
+
+        // REMOVE WINDOWS SCROLL LISTENER
+        $(window).unbind();
     }
 
+    // 최신 메모 불러오기
     loadNewMemo = () => {
         // CANCEL IF THERE IS A PENDING REQUEST
         if(this.props.listStatus === 'WAITING'){
@@ -57,6 +97,30 @@ class Home extends Component {
         return this.props.memoListRequest(false, 'new', this.props.memoData.get('data')[0]._id);
         // return this.props.memoListRequest(true);
     }
+
+    // 오래된 메모 불러오기
+    loadOldMemo = () => {
+        // CANCEL IF USER IS READING THE LAST PAGE
+        if(this.props.isLast) {
+            return new Promise(
+                (resolve, reject) => {
+                    resolve();
+                }
+            )
+        }
+
+        // GET ID OF THE MEMO AT THE BOTTOM
+        let lastId = this.props.memoData.get('data')[this.props.memoData.get('data').length - 1]._id;
+
+        // START REQUEST
+        return this.props.memoListRequest(false, 'old', lastId).then(() => {
+            // IF IT IS LAST PAGE, NOTIFY
+            if(this.props.isLast) {
+                Materialize.toast('마지막 페이지 :)', 2000);
+            }
+        })
+    }
+
 
 
     // 로그아웃
@@ -139,7 +203,8 @@ const mapStateToProps = (state) => {
         postStatus: state.memo.get('post'),
         currentUser: state.authentication.getIn(['status', 'currentUser']),
         memoData: state.memo.get('memoList'),
-        listStatus: state.memo.getIn(['memoList', 'status'])
+        listStatus: state.memo.getIn(['memoList', 'status']),
+        isLast: state.memo.getIn(['memoList', 'isLast'])
     }
 }
 

@@ -36,7 +36,7 @@ export default function memo(state = initialState, action) {
             return state.setIn(['memoList', 'status'], 'WAITING');
 
         case types.MEMO_LIST_SUCCESS:
-
+            // Reference
             const data = state.getIn(['memoList', 'data']);
 
             if(action.isInitial) {
@@ -46,34 +46,29 @@ export default function memo(state = initialState, action) {
             } else {
 
                 if(action.listType === 'new') {
-
                     // console.log('action.data ===>', action.data[0]._id);
                     // console.log('reducer.data ===>', data[0]._id);
-
                     if(action.data.length !== 0){
-
                         console.log('action data', action.data);
+                        /**
+                         * State에 중복값이 들어가서 Duplicate Key Error가 나는걸 막아주는 작업
+                         * : memoList.date에 있는 List의 키값을 모두 불러와서 배열에 저장해 놓는다.
+                        */
                         let original = List(data).toArray();
                         let oArr = [];
-                        // console.log('오리지나르:', original);
                         for(var memo of original){
                             oArr.push(memo._id);
                         }
 
+                        // 새로 들어온 값과 기존 값의 _id를 비교해서 새로운 값만 업데이트한다.
                         let nArr = [];
                         for(var i=0; i<action.data.length; i++){
                             if(oArr.indexOf(action.data[i]._id) === -1) nArr.push(action.data[i]);
                         }
 
-                        console.log("ㅋㅋㅋ: ", nArr);
+                        console.log("업데이트될 내용: ", nArr);
 
-
-                        // console.log('뉴데이터===>', newerData.length);
-                        // if(newerData.length !== 0){
-                        //     newerData.map(e => data.unshift(e));
-                        // }
-
-                        // console.log('action.data', action.data);
+                        // memoList.data 배열 앞부분에 추가한다.
                         if(nArr.length !== 0){
                             nArr.map(e => data.unshift(e));
                         }
@@ -81,9 +76,13 @@ export default function memo(state = initialState, action) {
                     return state.setIn(['memoList', 'status'], 'SUCCESS');
 
                 } else {
-                    return state.setIn(['memoList', 'success'], 'SUCCESS')
-                                // .updateIn(['memoList', 'data'], list => list.push(action.data))
-                                // .setIn(['memoList', 'isLast'], action.data.length < 6);
+                    // 이전 메모 불러오기
+                    for(var dt of action.data){
+                        data.push(dt);
+                    }
+
+                    return state.setIn(['memoList', 'status'], 'SUCCESS')
+                                .setIn(['memoList', 'isLast'], action.data.length < 6);
                 }
             }
 
