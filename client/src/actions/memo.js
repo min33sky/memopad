@@ -1,5 +1,6 @@
 import { MEMO_POST, MEMO_POST_FAILURE, MEMO_POST_SUCCESS,
-        MEMO_LIST, MEMO_LIST_FAILURE, MEMO_LIST_SUCCESS
+        MEMO_LIST, MEMO_LIST_FAILURE, MEMO_LIST_SUCCESS,
+        MEMO_EDIT, MEMO_EDIT_FAILURE, MEMO_EDIT_SUCCESS
 } from './ActionTypes';
 import axios from 'axios';
 
@@ -98,5 +99,49 @@ export function memoListSuccess(data, isInitial, listType) {
 export function memoListFailure() {
     return {
         type: MEMO_LIST_FAILURE
+    }
+}
+
+// ************************************************************************
+// 메모 수정 관련 액션 생성자
+// ************************************************************************
+
+// redux-thunk
+export function memoEditRequest(id, index, contents) {
+    return (dispatch) => {
+
+        // INFORM EDIT_REQUEST IS STARTING
+        dispatch(memoEdit());
+
+        return axios.put('/api/memo/' + id, {contents})
+                    .then((response) => {
+                        console.log("성공");
+                        dispatch(memoEditSuccess(index, response.data.memo))
+                    }).catch((error) => {
+                        console.log("에러", error);
+                        dispatch(memoEditFailure(error.response.data.code));
+                    });
+
+    }
+}
+
+export function memoEdit() {
+    return {
+        type: MEMO_EDIT
+    }
+}
+
+export function memoEditSuccess(index, memo) {
+    return {
+        type: MEMO_EDIT_SUCCESS,
+        index,
+        memo
+    }
+}
+
+export function memoEditFailure(error) {
+    return {
+        type: MEMO_EDIT_FAILURE,
+        error
     }
 }

@@ -60,6 +60,11 @@ router.post('/', (req, res) => {
 */
 router.put('/:id', (req, res) => {
 
+    console.log("아이디 : ", req.params.id);
+    console.log("컨텐츠 : ", req.body.contents);
+    console.log("컨텐츠 타입 : ", typeof req.body.contents);
+
+
     // CHECK MEMO ID VALIDITY
     if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
         return res.status(400).json({
@@ -69,7 +74,7 @@ router.put('/:id', (req, res) => {
     }
 
     // CHECK CONTENTS VALID
-    if(typeof res.body.contents !== 'string') {
+    if(typeof req.body.contents !== 'string') {
         return res.status(400).json({
             error: "EMPTY CONTENTS",
             code: 2
@@ -225,7 +230,7 @@ router.get('/:listType/:id', (req, res) => {
         .exec((err, memos) => {
             if(err) throw err;
 
-            console.log('===== memos ====> ', memos);
+            console.log('===== 최신 메모 ====> ', memos);
 
             return res.json(memos);
             });

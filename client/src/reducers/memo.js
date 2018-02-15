@@ -1,23 +1,49 @@
 import * as types from '../actions/ActionTypes';
-import { Map, List } from 'immutable';
+import { fromJS } from 'immutable';
 
 // Default State
-const initialState = Map({
-    post: Map({
+// const initialState = Map({
+//     post: Map({
+//         status: 'INIT',
+//         error: -1
+//     }),
+//     memoList: Map({
+//         status: 'INIT',
+//         data: List([ ]),
+//         isLast: false
+//     }),
+//     edit: Map({
+//         status: 'INIT',
+//         error: -1
+//     })
+// });
+
+const initialState = fromJS({
+    post: {
         status: 'INIT',
         error: -1
-    }),
-    memoList: Map({
+    },
+    memoList: {
         status: 'INIT',
-        data: List([]),
+        data: [],
         isLast: false
-    })
+    },
+    edit: {
+        status: 'INIT',
+        error: '-1'
+    }
 });
 
 // REDUCER FUNCTION
 export default function memo(state = initialState, action) {
 
+    // Reference
+    const data = state.getIn(['memoList', 'data']);
+    // console.log("기본 data형 : ", data);
+
     switch(action.type) {
+
+
 
         // MEMO POST
         case types.MEMO_POST:
@@ -36,52 +62,49 @@ export default function memo(state = initialState, action) {
             return state.setIn(['memoList', 'status'], 'WAITING');
 
         case types.MEMO_LIST_SUCCESS:
-            // Reference
-            const data = state.getIn(['memoList', 'data']);
+
+            // console.log("리듀서 데이터 ", action.data);
+            // console.log('상테 데이터 : ', data);
 
             if(action.isInitial) {
                 return state.setIn(['memoList', 'status'], 'SUCCESS')
-                            .setIn(['memoList', 'data'], action.data)
-                            .setIn(['memoList', 'isLast'], action.data.length < 6);
+                            .setIn(['memoList', 'data'], fromJS(action.data))
+                            .setIn(['memoList', 'isLast'], fromJS(action.data.length < 6));
             } else {
 
                 if(action.listType === 'new') {
-                    // console.log('action.data ===>', action.data[0]._id);
-                    // console.log('reducer.data ===>', data[0]._id);
+
+
                     if(action.data.length !== 0){
-                        console.log('action data', action.data);
-                        /**
-                         * State에 중복값이 들어가서 Duplicate Key Error가 나는걸 막아주는 작업
-                         * : memoList.date에 있는 List의 키값을 모두 불러와서 배열에 저장해 놓는다.
-                        */
-                        let original = List(data).toArray();
-                        let oArr = [];
-                        for(var memo of original){
-                            oArr.push(memo._id);
-                        }
+                        // 상태의 데이터에서 _id값만 뽑아온다.
+                        let _ids = data.map(e => e.get('_id'));
 
-                        // 새로 들어온 값과 기존 값의 _id를 비교해서 새로운 값만 업데이트한다.
-                        let nArr = [];
-                        for(var i=0; i<action.data.length; i++){
-                            if(oArr.indexOf(action.data[i]._id) === -1) nArr.push(action.data[i]);
-                        }
+                        let insertData = action.data.filter(e => !_ids.contains(e._id));
 
-                        console.log("업데이트될 내용: ", nArr);
+                        // console.log('들어갈 데이터 : ', insertData);
 
-                        // memoList.data 배열 앞부분에 추가한다.
-                        if(nArr.length !== 0){
-                            nArr.map(e => data.unshift(e));
-                        }
+
+
+                        // const newData = action.data.reduce((acc, item) => acc.unshift(fromJS(item)), data);
+                        insertData.reduce((acc, item) => acc.unshift(fromJS(item)), data);
+
+                        return state
+                                    .setIn(['memoList', 'status'], 'SUCCESS')
+                                    // .setIn(['memoList', 'data'], newData);
+                                    .setIn(['memoList', 'data'], fromJS(insertData).concat(data));
+
+                    } else {
+                        return state.setIn(['memoList', 'status'], 'SUCCESS')
                     }
-                    return state.setIn(['memoList', 'status'], 'SUCCESS');
+
 
                 } else {
-                    // 이전 메모 불러오기
-                    for(var dt of action.data){
-                        data.push(dt);
-                    }
+
+                    // const oldData = action.data.reduce((acc, item) => acc.push(fromJS(item)), data);
 
                     return state.setIn(['memoList', 'status'], 'SUCCESS')
+                                .setIn(['memoList', 'data'], data.concat(fromJS(action.data)))
+                                // .setIn(['memoList', 'data'], oldData)
                                 .setIn(['memoList', 'isLast'], action.data.length < 6);
                 }
             }
@@ -89,6 +112,24 @@ export default function memo(state = initialState, action) {
         case types.MEMO_LIST_FAILURE:
             return state.setIn(['memoList', 'status'], 'FAILURE');
 
+        // MEMO EDIT
+        case types.MEMO_EDIT:
+            return state.setIn(['edit', 'status'], 'WAITING')
+                        .setIn(['edit', 'error'], -1)
+                        .setIn(['edit', 'memo'], undefined);
+
+        // 작동 확인 필요
+        case types.MEMO_EDIT_SUCCESS:
+            // editData.set(action.index, action.memo);
+            console.log('수정 인덱스 : ', action.index);
+            console.log('수정 데이터 : ', action.memo);
+            return state.setIn(['edit', 'status'], 'SUCCESS')
+                        .setIn(['memoList', 'data'], data.set(action.index, fromJS(action.memo)));
+
+
+        case types.MEMO_EDIT_FAILURE:
+            return state.setIn(['edit', 'status'], 'FAILURE')
+                        .setIn(['edit', 'error'], action.error);
 
         default:
             return state;

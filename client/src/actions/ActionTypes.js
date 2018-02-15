@@ -35,4 +35,11 @@ export const MEMO_LIST = "MEMO_LIST";
 export const MEMO_LIST_SUCCESS = "MEMO_LIST_SUCCESS";
 export const MEMO_LIST_FAILURE = "MEMO_LIST_FAILURE";
 
+// ************************************************************************
+// 메모 수정 관련 액션
+// ************************************************************************
+
+export const MEMO_EDIT = "MEMO_EDIT";
+export const MEMO_EDIT_SUCCESS = "MEMO_EDIT_SUCCESS";
+export const MEMO_EDIT_FAILURE = "MEMO_EDIT_FAILURE";
 
