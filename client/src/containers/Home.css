@@ -1,5 +1,6 @@
 body {
     background-color: rgb(223, 231, 236);
+    overflow-x: hidden; /* 가로 스크롤바 생기는걸 막는다 */
 }
 
 .wrapper {

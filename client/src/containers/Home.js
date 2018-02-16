@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Header, Write, MemoList } from '../components';
 import { connect } from 'react-redux';
 import { logoutRequest } from '../actions/authentication';
-import { memoPostRequest, memoListRequest, memoEditRequest } from '../actions/memo';
+import { memoPostRequest, memoListRequest, memoEditRequest, memoRemoveRequest } from '../actions/memo';
 import './Home.css';
 
 const Materialize = window.Materialize;
@@ -32,11 +32,11 @@ class Home extends Component {
         // 해상도가 클 때 스크롤바가 안나오는 경우를 대비
         const loadUntilScrollable = () => {
             // IF THE SCHROLLBAR DOES NOT EXIST,
-            if($('body').height() < $(window).height()) {
+            if ($('body').height() < $(window).height()) {
                 this.loadOldMemo().then(
                     () => {
                         // DO THIS RECURSIVELY UNLESS IT'S LAST PAGE
-                        if(!this.props.isLast){
+                        if (!this.props.isLast) {
                             loadUntilScrollable();
                         }
                     }
@@ -55,15 +55,15 @@ class Home extends Component {
 
         $(window).scroll(() => {
             // WHEN HEIGHT UNDER SCROLLBOTTOM IS LESS THEN 250
-            if($(document).height() - $(window).height() - $(window).scrollTop() < 250) {
-                if(!this.state.loadingState) {
+            if ($(document).height() - $(window).height() - $(window).scrollTop() < 250) {
+                if (!this.state.loadingState) {
                     this.loadOldMemo(); // 이전 메모를 불러온다.
                     this.setState({
                         loadingState: true
                     });
                 }
             } else {
-                if(this.state.loadingState) {
+                if (this.state.loadingState) {
                     this.setState({
                         loadingState: false
                     })
@@ -83,7 +83,7 @@ class Home extends Component {
     // 최신 메모 불러오기
     loadNewMemo = () => {
         // CANCEL IF THERE IS A PENDING REQUEST
-        if(this.props.listStatus === 'WAITING'){
+        if (this.props.listStatus === 'WAITING') {
             console.log("================기 다 려=================");
             return new Promise((resolve, reject) => {
                 resolve();
@@ -91,7 +91,7 @@ class Home extends Component {
         }
 
         // IF PAGE IS EMPTY, DO THE INITIAL LOADING
-        if(this.props.memoData.get('data').size === 0){
+        if (this.props.memoData.get('data').size === 0) {
             console.log("아무것도 없쓰요");
             return this.props.memoListRequest(true);
         }
@@ -104,7 +104,7 @@ class Home extends Component {
     // 오래된 메모 불러오기
     loadOldMemo = () => {
         // CANCEL IF USER IS READING THE LAST PAGE
-        if(this.props.isLast) {
+        if (this.props.isLast) {
             return new Promise(
                 (resolve, reject) => {
                     resolve();
@@ -122,7 +122,7 @@ class Home extends Component {
         // START REQUEST
         return this.props.memoListRequest(false, 'old', lastId).then(() => {
             // IF IT IS LAST PAGE, NOTIFY
-            if(this.props.isLast) {
+            if (this.props.isLast) {
                 Materialize.toast('마지막 페이지 :)', 2000);
             }
         })
@@ -150,7 +150,7 @@ class Home extends Component {
     // 메모 쓰기
     handlePost = (contents) => {
         return this.props.memoPostRequest(contents).then(() => {
-            if(this.props.postStatus.get('status') === 'SUCCESS') {
+            if (this.props.postStatus.get('status') === 'SUCCESS') {
                 // TRIGGER LOAD NEW MEMO
                 this.loadNewMemo().then(() => {
                     Materialize.toast('Success!', 2000);
@@ -162,7 +162,7 @@ class Home extends Component {
                         2: EMPTY CONTENTS
                 */
                 let $toastContent;
-                switch(this.props.postStatus.get('error')) {
+                switch (this.props.postStatus.get('error')) {
                     case 1:
                         // IF NOT LOGGED IN, NOTIFY AND REFRESH AFTER
                         $toastContent = $('<span style="color: ##FFB4BA">You are not logged in</span>');
@@ -192,17 +192,17 @@ class Home extends Component {
     handleEdit = (id, index, contents) => {
         return this.props.memoEditRequest(id, index, contents).then(
             () => {
-                if(this.props.editStatus.get('status') === 'SUCCESS') {
+                if (this.props.editStatus.get('status') === 'SUCCESS') {
                     Materialize.toast('Success!', 2000);
                 } else {
-                   /*
-                        ERROR CODES
-                            1: INVALID ID,
-                            2: EMPTY CONTENTS
-                            3: NOT LOGGED IN
-                            4: NO RESOURCE
-                            5: PERMISSION FAILURE
-                    */
+                    /*
+                         ERROR CODES
+                             1: INVALID ID,
+                             2: EMPTY CONTENTS
+                             3: NOT LOGGED IN
+                             4: NO RESOURCE
+                             5: PERMISSION FAILURE
+                     */
                     let errorMessage = [
                         'Something broke',
                         'Please write soemthing',
@@ -218,24 +218,61 @@ class Home extends Component {
                     Materialize.toast($toastContent, 2000);
 
                     // IF NOT LOGGED IN, REFRESH THE PAGE AFTER 2 SECONDS
-                    if(error === 3) {
-                        setTimeout(()=> {window.location.reload(false)}, 2000);
+                    if (error === 3) {
+                        setTimeout(() => { window.location.reload(false) }, 2000);
                     }
                 }
             }
         )
     }
 
+    /**
+     * 메모 삭제 핸들러
+     */
+    handleRemove = (id, index) => {
+        this.props.memoRemoveRequest(id, index).then(() => {
+            if (this.props.removeStatus.get('status') === 'SUCCESS') {
+                // LOAD MORE MEMO IF THERE IS NO SCROLLBAR
+                // 1 SECOND LATER. (ANIMATION TAKES 1SEC)
+                setTimeout(() => {
+                    if ($('body').height() < $(window).height()) {
+                        this.loadOldMemo();
+                    }
+                }, 1000);
+            } else {
+                // ERROR
+                /*
+                    DELETE MEMO: DELETE /api/memo/:id
+                    ERROR CODES
+                        1: INVALID ID
+                        2: NOT LOGGED IN
+                        3: NO RESOURCE
+                        4: PERMISSION FAILURE
+                */
+                let errorMessage = [
+                    'Something broke',
+                    'You are not logged in',
+                    'That memo does not exist',
+                    'You do not have permission'
+                ];
+
+                // NOTIFY ERROR
+                let $toastContent = $('<span style="color: #FFB4BA">' + errorMessage[this.props.removeStatus.error - 1] + '</span>');
+                Materialize.toast($toastContent, 2000);
+
+
+                // IF NOT LOGGED IN, REFRESH THE PAGE
+                if (this.props.removeStatus.error === 2) {
+                    setTimeout(() => { window.location.reload(false) }, 2000);
+                }
+            }
+        })
+    }
 
     render() {
 
-        // console.log("시바 : ", this.props.memoData);
-        // console.log("시바ㅋㅋㅋㅋㅋ : ", this.props.memoData.toJS());
-
-
         const { data } = this.props.memoData.toJS();
-
-        const write = (<Write onPost={this.handlePost}/>);
+        const write = (<Write onPost={this.handlePost} />);
 
         return (
             <div>
@@ -243,8 +280,9 @@ class Home extends Component {
                 <div className="wrapper">
                     {this.props.isLoggedIn ? write : undefined}
                     <MemoList data={data}
-                            currentUser={this.props.currentUser}
-                            onEdit={this.handleEdit}
+                        currentUser={this.props.currentUser}
+                        onEdit={this.handleEdit}
+                        onRemove={this.handleRemove}
                     />
                 </div>
             </div>
@@ -260,7 +298,8 @@ const mapStateToProps = (state) => {
         memoData: state.memo.get('memoList'),
         listStatus: state.memo.getIn(['memoList', 'status']),
         isLast: state.memo.getIn(['memoList', 'isLast']),
-        editStatus: state.memo.get('edit')
+        editStatus: state.memo.get('edit'),
+        removeStatus: state.memo.get('remove')
     }
 }
 
@@ -277,6 +316,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         memoEditRequest: (id, index, contents) => {
             return dispatch(memoEditRequest(id, index, contents));
+        },
+        memoRemoveRequest: (id, index) => {
+            return dispatch(memoRemoveRequest(id, index));
         }
     }
 }

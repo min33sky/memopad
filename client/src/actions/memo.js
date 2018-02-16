@@ -1,6 +1,7 @@
 import { MEMO_POST, MEMO_POST_FAILURE, MEMO_POST_SUCCESS,
         MEMO_LIST, MEMO_LIST_FAILURE, MEMO_LIST_SUCCESS,
-        MEMO_EDIT, MEMO_EDIT_FAILURE, MEMO_EDIT_SUCCESS
+        MEMO_EDIT, MEMO_EDIT_FAILURE, MEMO_EDIT_SUCCESS,
+        MEMO_REMOVE, MEMO_REMOVE_FAILURE, MEMO_REMOVE_SUCCESS
 } from './ActionTypes';
 import axios from 'axios';
 
@@ -142,6 +143,46 @@ export function memoEditSuccess(index, memo) {
 export function memoEditFailure(error) {
     return {
         type: MEMO_EDIT_FAILURE,
+        error
+    }
+}
+
+
+// ************************************************************************
+// 메모 삭제 관련 액션 생성자
+// ************************************************************************
+
+// redux-thunk
+export function memoRemoveRequest(id, index) {
+    return (dispatch) => {
+        // INFORM REMOVE IS STARTING
+        dispatch(memoRemove());
+
+        return axios.delete('/api/memo/' + id)
+                    .then((response) => {
+                        dispatch(memoRemoveSuccess(index));
+                    }).catch((error) => {
+                        dispatch(memoRemoveFailure(error.response.data.code));
+                    });
+    }
+}
+
+export function memoRemove() {
+    return {
+        type: MEMO_REMOVE
+    }
+}
+
+export function memoRemoveSuccess(index) {
+    return {
+        type: MEMO_REMOVE_SUCCESS,
+        index
+    }
+}
+
+export function memoRemoveFailure(error) {
+    return {
+        type: MEMO_REMOVE_FAILURE,
         error
     }
 }

@@ -43,3 +43,10 @@ export const MEMO_EDIT = "MEMO_EDIT";
 export const MEMO_EDIT_SUCCESS = "MEMO_EDIT_SUCCESS";
 export const MEMO_EDIT_FAILURE = "MEMO_EDIT_FAILURE";
 
+// ************************************************************************
+// 메모 삭제 관련 액션
+// ************************************************************************
+
+export const MEMO_REMOVE = "MEMO_REMOVE";
+export const MEMO_REMOVE_SUCCESS = "MEMO_REMOVE_SUCCESS";
+export const MEMO_REMOVE_FAILURE = "MEMO_REMOVE_FAILURE";

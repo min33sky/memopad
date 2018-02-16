@@ -1,23 +1,6 @@
 import * as types from '../actions/ActionTypes';
 import { fromJS } from 'immutable';
 
-// Default State
-// const initialState = Map({
-//     post: Map({
-//         status: 'INIT',
-//         error: -1
-//     }),
-//     memoList: Map({
-//         status: 'INIT',
-//         data: List([ ]),
-//         isLast: false
-//     }),
-//     edit: Map({
-//         status: 'INIT',
-//         error: -1
-//     })
-// });
-
 const initialState = fromJS({
     post: {
         status: 'INIT',
@@ -31,6 +14,10 @@ const initialState = fromJS({
     edit: {
         status: 'INIT',
         error: '-1'
+    },
+    remove: {
+        status: 'INIT',
+        error: -1
     }
 });
 
@@ -118,7 +105,6 @@ export default function memo(state = initialState, action) {
                         .setIn(['edit', 'error'], -1)
                         .setIn(['edit', 'memo'], undefined);
 
-        // 작동 확인 필요
         case types.MEMO_EDIT_SUCCESS:
             // editData.set(action.index, action.memo);
             console.log('수정 인덱스 : ', action.index);
@@ -130,6 +116,20 @@ export default function memo(state = initialState, action) {
         case types.MEMO_EDIT_FAILURE:
             return state.setIn(['edit', 'status'], 'FAILURE')
                         .setIn(['edit', 'error'], action.error);
+
+        // 메모 삭제 관련
+        case types.MEMO_REMOVE:
+            return state.setIn(['remove', 'status'], 'WAITING')
+                        .setIn(['remove', 'error'], -1);
+
+        // 임시 : 확인 필요!!!
+        case types.MEMO_REMOVE_SUCCESS:
+            return state.setIn(['remove', 'status'], 'SUCCESS')
+                        .setIn(['memoList', 'data'], data.delete(action.index));
+
+        case types.MEMO_REMOVE_FAILURE:
+            return state.setIn(['remove', 'status'], 'FAILURE')
+                        .setIn(['remove', 'error'], action.error);
 
         default:
             return state;
