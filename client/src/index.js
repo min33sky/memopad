@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 // Container
-import { App, Home, Login, Register, Error404 } from './containers';
+import { App, Home, Login, Register, Wall, Error404 } from './containers';
+
 // Router
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 
@@ -25,6 +26,7 @@ const Root = () => (
                     <Route path="/home" component={Home} />
                     <Route path="/login" component={Login} />
                     <Route path="/register" component={Register} />
+                    <Route path="/wall/:username" component={Wall} />
                     <Route component={Error404} />
                 </Switch>
             </Router>

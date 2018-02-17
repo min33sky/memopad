@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import TimeAgo from 'react-timeago';
+import { Link } from 'react-router-dom';
 import './Memo.css';
 
 const $ = window.$;
+const Materialize = window.Materialize
 
 class Memo extends Component {
-
 
     constructor(props) {
         super(props);
@@ -16,9 +17,12 @@ class Memo extends Component {
         }
     }
 
+    // *******************************************************
+    // 생명주기 메서드
+    // *******************************************************
     componentDidMount() {
         // WHEN COMPONENT MOUNTS, INITIALIZE DROPDOWN
-        // (TRIGGERED WHEN FREFRESHED)
+        // (TRIGGERED WHEN REFRESHED)
         $(`#dropdown-button-` + this.props.data._id).dropdown({
             belowOrigin: true // Display dropdown below the button
         });
@@ -29,9 +33,10 @@ class Memo extends Component {
         // (TRIGGERED WHEN LOGGED IN)
         $(`#dropdown-button-` + this.props.data._id).dropdown({
             beloworigin: true // Display dropdown below the button
-        })
+        });
     }
 
+    // 상태가 바뀔 때만 렌더링 처리
     shouldComponentUpdate(nextProps, nextState) {
         let current = {
             props: this.props,
@@ -44,13 +49,15 @@ class Memo extends Component {
         }
 
         let update = JSON.stringify(current) !== JSON.stringify(next);
-
         return update;
     }
 
-    // Edit Toggle handler
-    toggleEdit = () => {
+    // *****************************************************
+    // 이벤트 핸들러
+    // *****************************************************
 
+    // 수정(edit) 버튼 핸들러
+    toggleEdit = () => {
         if(this.state.editMode) {
             let id = this.props.data._id;
             let index = this.props.index;
@@ -69,7 +76,7 @@ class Memo extends Component {
 
     }
 
-    // Text Input handler
+    // 입력 핸들러 (textInput)
     handleChange = (e) => {
         this.setState({
             value: e.target.value
@@ -83,18 +90,16 @@ class Memo extends Component {
         this.props.onRemove(id, index);
     }
 
-    /**
-     * 별점 핸들러
-     */
+    // 별점 핸들러
     handleStar = () => {
-        // 로그인 상태가 아닐 때
+        // 로그인 상태가 아닐 때는 서버로 요청을 보내지 않는다.
         if(this.props.currentUser === ''){
             let $toastContent = $('<span style="color: #FFB4BA">로그인이 필요해요 :)</span>');
-            window.Materialize.toast($toastContent, 2000);
+            Materialize.toast($toastContent, 2000);
             return;
         }
 
-
+        // 글의 아이디 (server) & 인덱스 (array in state)
         let id = this.props.data._id;
         let index = this.props.index;
         this.props.onStar(id, index);
@@ -131,11 +136,13 @@ class Memo extends Component {
 
         /**
          * MEMO VIEW (editMode = false)
+         *  1.작성자일 경우에만 드롭다운 메뉴를 보여준다.
+         *  2.본인이 별점을 줬다면 별에 스타일을 적용한 뷰를 보여준다.
          */
         const memoView = (
             <div className="card">
                     <div className="info">
-                        <a className="username">{data.writer}</a> wrote a log · <TimeAgo date={this.props.data.date.created}/>
+                        <Link to={`/wall/${this.props.data.writer}`} className="username">{data.writer}</Link> wrote a log · <TimeAgo date={this.props.data.date.created}/>
                         { data.is_edited ? editedInfo : undefined}
                         { ownership ? dropDownMenu : undefined }
                     </div>

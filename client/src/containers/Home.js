@@ -4,9 +4,9 @@ import { connect } from 'react-redux';
 import { logoutRequest } from '../actions/authentication';
 import {
     memoPostRequest, memoListRequest,
-    memoEditRequest, memoRemoveRequest,
-    memoStarRequest
+    memoEditRequest, memoRemoveRequest, memoStarRequest
 } from '../actions/memo';
+import PropTypes from 'prop-types';
 import './Home.css';
 
 const Materialize = window.Materialize;
@@ -17,10 +17,14 @@ class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loadingState: false
+            loadingState: false,    // 이전 글 로딩
+            initiallyLoaded: false  // 검색시 로딩
         }
     }
 
+    // ******************************************
+    // 생명 주기 메서드
+    // ******************************************
 
     // 컴포넌트 마운트되기 전에 글 목록 불러오기
     componentDidMount() {
@@ -48,15 +52,23 @@ class Home extends Component {
             }
         }
 
-        this.props.memoListRequest(true).then(
+        // DO THE INITIAL LOADING
+        this.props.memoListRequest(true, undefined, undefined, this.props.username).then(
             () => {
-
-                loadUntilScrollable();
+                // LOAD MEMO UNTIL SCHROLLABLE
+                // 메모가 사라지는 에니메이션이 1초가 걸리므로 1초 뒤에 확인
+                setTimeout(loadUntilScrollable(), 1000);
                 // BEGIN NEW MEMO LOADING LOOP
                 loadMemoLoop();
+
+                // 서버에서 메모를 가져왔으니 상태값 변경
+                this.setState({
+                    initiallyLoaded: true
+                });
             }
         );
 
+        // 무한 스크롤링 기능
         $(window).scroll(() => {
             // WHEN HEIGHT UNDER SCROLLBOTTOM IS LESS THEN 250
             if ($(document).height() - $(window).height() - $(window).scrollTop() < 250) {
@@ -76,13 +88,34 @@ class Home extends Component {
         })
     }
 
+    // 담벼락(Wall)에서 검색시 홈 컴포넌트가 다시 마운트되지 않고 업데이트되므로
+    // 직접 메서드를 실행하기 위한 코드이다
+    componentDidUpdate(prevProps, prevState) {
+        if(this.props.username !== prevProps.username) {
+            // 다시 컴포넌트가 마운트나 언마운트가 되는건 아니다
+            // 그냥 코드를 실행할 뿐....
+            this.componentWillUnmount();
+            this.componentDidMount();
+        }
+    }
+
     componentWillUnmount() {
         // STOPS THE loadMemoLoop
         clearTimeout(this.memoLoaderTimeoutId);
 
         // REMOVE WINDOWS SCROLL LISTENER
         $(window).unbind();
+
+        this.setState({
+            initiallyLoaded: false
+        });
     }
+
+
+    // **************************************************
+    // 이벤트 핸들러
+    // **************************************************
+
 
     // 최신 메모 불러오기
     loadNewMemo = () => {
@@ -96,12 +129,11 @@ class Home extends Component {
 
         // IF PAGE IS EMPTY, DO THE INITIAL LOADING
         if (this.props.memoData.get('data').size === 0) {
-            console.log("아무것도 없쓰요");
-            return this.props.memoListRequest(true);
+            console.log("저장된 메모가 없다.");
+            return this.props.memoListRequest(true, undefined, undefined, this.props.username);
         }
 
-
-        return this.props.memoListRequest(false, 'new', this.props.memoData.get('data').get(0).get('_id'));
+        return this.props.memoListRequest(false, 'new', this.props.memoData.get('data').get(0).get('_id'), this.props.username);
     }
 
     // 오래된 메모 불러오기
@@ -120,7 +152,7 @@ class Home extends Component {
 
 
         // START REQUEST
-        return this.props.memoListRequest(false, 'old', lastId).then(() => {
+        return this.props.memoListRequest(false, 'old', lastId, this.props.username).then(() => {
             // IF IT IS LAST PAGE, NOTIFY
             if (this.props.isLast) {
                 Materialize.toast('마지막 페이지 :)', 2000);
@@ -313,11 +345,36 @@ class Home extends Component {
         const { data } = this.props.memoData.toJS();
         const write = (<Write onPost={this.handlePost} />);
 
+        // 검색 데이터가 없을 때 보여지는 뷰
+        const emptyView = (
+            <div className="container">
+                <div className="empty-page">
+                    <b>{this.props.username}</b> 님은 존재하지 않는 사용자거나 혹은 어떤 글도 남기지 않았어요 :(
+                </div>
+            </div>
+        );
+
+        // 담벼락 헤더
+        const wallHeader = (
+            <div>
+                <div className="container wall-info">
+                    <div className="card wall-info indigo lighten-2 white-text">
+                        <div className="card-content">
+                            작성자 : {this.props.username}
+                        </div>
+                    </div>
+                </div>
+                { this.props.memoData.get('data').size === 0 && this.state.initiallyLoaded ? emptyView : undefined }
+            </div>
+        );
+
+
         return (
             <div>
                 <Header isLoggedIn={this.props.isLoggedIn} onLogout={this.handleLogout} />
                 <div className="wrapper">
-                    {this.props.isLoggedIn ? write : undefined}
+                    { typeof this.props.username !== 'undefined' ? wallHeader : undefined }
+                    {this.props.isLoggedIn && typeof this.props.username === 'undefined' ? write : undefined}
                     <MemoList data={data}
                         currentUser={this.props.currentUser}
                         onEdit={this.handleEdit}
@@ -329,6 +386,16 @@ class Home extends Component {
         );
     }
 }
+
+Home.propTypes = {
+    username: PropTypes.string
+}
+
+Home.defaultProps = {
+    username: undefined
+}
+
+// REDUX와 COMPONENT 연결
 
 const mapStateToProps = (state) => {
     return {

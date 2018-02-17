@@ -67,11 +67,11 @@ export function memoListRequest(isInitial, listType, id, username) {
         let url = '/api/memo';
 
         if(typeof username === 'undefined') {
-            // USERNAME not given, LOAD public memo
+            // USERNAME not given, LOAD public memo (일반)
             url = isInitial ? url : `${url}/${listType}/${id}`;
         } else {
-            // LOAD memos of specific USER
-
+            // LOAD memos of specific USER (검색)
+            url = isInitial ? `${url}/${username}` : `${url}/${username}/${listType}/${id}`;
         }
 
         return axios.get(url)

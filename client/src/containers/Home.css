@@ -1,8 +1,21 @@
 body {
     background-color: rgb(223, 231, 236);
-    overflow-x: hidden; /* 가로 스크롤바 생기는걸 막는다 */
+    /* 에니메이션 효과로 가로 스크롤바 생기는걸 막는다 */
+    overflow-x: hidden;
 }
 
 .wrapper {
     margin-top: 20px;
+}
+
+/* 담벼락 헤더를 위한 스타일  */
+.empty-page {
+    font-size: 30px;
+    text-align: center;
+    color: #4D4D4D;
+}
+
+.wall-info {
+    font-size: 30px;
+    text-align: center;
 }
