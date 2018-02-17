@@ -1,9 +1,10 @@
 import { MEMO_POST, MEMO_POST_FAILURE, MEMO_POST_SUCCESS,
         MEMO_LIST, MEMO_LIST_FAILURE, MEMO_LIST_SUCCESS,
         MEMO_EDIT, MEMO_EDIT_FAILURE, MEMO_EDIT_SUCCESS,
-        MEMO_REMOVE, MEMO_REMOVE_FAILURE, MEMO_REMOVE_SUCCESS
+        MEMO_REMOVE, MEMO_REMOVE_FAILURE, MEMO_REMOVE_SUCCESS,
+        MEMO_STAR, MEMO_STAR_FAILURE, MEMO_STAR_SUCCESS
 } from './ActionTypes';
-import axios from 'axios';
+import axios from 'axios'; // AJAX MODULE (CALL SERVER API)
 
 // ************************************************************************
 // 메모 관련 액션 생성자
@@ -183,6 +184,46 @@ export function memoRemoveSuccess(index) {
 export function memoRemoveFailure(error) {
     return {
         type: MEMO_REMOVE_FAILURE,
+        error
+    }
+}
+
+// ************************************************************************
+// 별점 관련 액션 생성자
+// ************************************************************************
+
+// REDUX-THUNK
+export function memoStarRequest(id, index) {
+    return (dispatch) => {
+        // INFORM MEMO STAR IS STARTING
+        dispatch(memoStar());
+
+        return axios.post('/api/memo/star/' + id)
+                    .then((response) => {
+                        dispatch(memoStarSuccess(index, response.data.memo));
+                    }).catch((error) => {
+                        dispatch(memoStarFailure(error.response.data.code));
+                    });
+    }
+}
+
+export function memoStar() {
+    return {
+        type: MEMO_STAR
+    }
+}
+
+export function memoStarSuccess(index, memo) {
+    return {
+        type: MEMO_STAR_SUCCESS,
+        index,
+        memo
+    }
+}
+
+export function memoStarFailure(error) {
+    return {
+        type: MEMO_STAR_FAILURE,
         error
     }
 }

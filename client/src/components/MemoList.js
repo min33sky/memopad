@@ -6,7 +6,14 @@ import './MemoList.css';
 
 class MemoList extends Component {
 
+    // 전달받은 props값이 변경될 때만 render() 실행
+    shouldComponentUpdate(nextProps, nextState) {
+        let update = JSON.stringify(this.props) !== JSON.stringify(nextProps);
+        return update;
+    }
+
     render() {
+
         const mapToComponents = data => {
 
             return data.map((memo, i) => {
@@ -17,6 +24,8 @@ class MemoList extends Component {
                             index={i}
                             onEdit={this.props.onEdit}
                             onRemove={this.props.onRemove}
+                            onStar={this.props.onStar}
+                            currentUser={this.props.currentUser}
                         />);
             })
         }
@@ -26,9 +35,8 @@ class MemoList extends Component {
                 <ReactCSSTransitionGroup
                     transitionName="memo"
                     transitionEnterTimeout={2000}
-                    transitionLeaveTimeout={1000}
-                >
-                    {mapToComponents(this.props.data)}
+                    transitionLeaveTimeout={1000}>
+                        {mapToComponents(this.props.data)}
                 </ReactCSSTransitionGroup>
             </div>
         );
@@ -39,7 +47,8 @@ MemoList.propTypes = {
     data: PropTypes.array,
     currentUser: PropTypes.string,
     onEdit: PropTypes.func,
-    onRemove: PropTypes.func
+    onRemove: PropTypes.func,
+    onStar: PropTypes.func
 };
 
 MemoList.defaultProps = {
@@ -50,6 +59,9 @@ MemoList.defaultProps = {
     },
     onRemove: (id, index) => {
         console.error('Remove function not defined');
+    },
+    onStar: (id, index) => {
+        console.error('Star function not defined');
     }
 }
 

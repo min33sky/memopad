@@ -27,10 +27,12 @@ export const AUTH_LOGOUT = "AUTH_LOGOUT";
 // 메모 관련 액션
 // ************************************************************************
 
+// 메모 등록
 export const MEMO_POST = "MEMO_POST";
 export const MEMO_POST_SUCCESS = "MEMO_POST_SUCCESS";
 export const MEMO_POST_FAILURE = "MEMO_POST_FAILURE";
 
+// 메모 리스트 불러오기
 export const MEMO_LIST = "MEMO_LIST";
 export const MEMO_LIST_SUCCESS = "MEMO_LIST_SUCCESS";
 export const MEMO_LIST_FAILURE = "MEMO_LIST_FAILURE";
@@ -50,3 +52,11 @@ export const MEMO_EDIT_FAILURE = "MEMO_EDIT_FAILURE";
 export const MEMO_REMOVE = "MEMO_REMOVE";
 export const MEMO_REMOVE_SUCCESS = "MEMO_REMOVE_SUCCESS";
 export const MEMO_REMOVE_FAILURE = "MEMO_REMOVE_FAILURE";
+
+// ************************************************************************
+// 메모 별점 관련 액션
+// ************************************************************************
+
+export const MEMO_STAR = "MEMO_STAR";
+export const MEMO_STAR_SUCCESS = "MEMO_STAR_SUCCESS";
+export const MEMO_STAR_FAILURE = "MEMO_STAR_FAILURE";

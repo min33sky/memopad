@@ -13,9 +13,13 @@ const initialState = fromJS({
     },
     edit: {
         status: 'INIT',
-        error: '-1'
+        error: -1
     },
     remove: {
+        status: 'INIT',
+        error: -1
+    },
+    star: {
         status: 'INIT',
         error: -1
     }
@@ -122,7 +126,6 @@ export default function memo(state = initialState, action) {
             return state.setIn(['remove', 'status'], 'WAITING')
                         .setIn(['remove', 'error'], -1);
 
-        // 임시 : 확인 필요!!!
         case types.MEMO_REMOVE_SUCCESS:
             return state.setIn(['remove', 'status'], 'SUCCESS')
                         .setIn(['memoList', 'data'], data.delete(action.index));
@@ -130,6 +133,19 @@ export default function memo(state = initialState, action) {
         case types.MEMO_REMOVE_FAILURE:
             return state.setIn(['remove', 'status'], 'FAILURE')
                         .setIn(['remove', 'error'], action.error);
+
+
+        // 별점 관련
+        case types.MEMO_STAR:
+            return state.setIn(['star', 'status'], 'WAITING');
+
+        case types.MEMO_STAR_SUCCESS:
+            return state.setIn(['star', 'status'], 'SUCCESS')
+                        .setIn(['memoList', 'data'], data.set(action.index, fromJS(action.memo)));
+
+        case types.MEMO_STAR_FAILURE:
+            return state.setIn(['star', 'status'], 'FAILURE')
+                        .setIn(['star', 'error'], action.error);
 
         default:
             return state;

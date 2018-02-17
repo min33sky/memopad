@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import { Header, Write, MemoList } from '../components';
 import { connect } from 'react-redux';
 import { logoutRequest } from '../actions/authentication';
-import { memoPostRequest, memoListRequest, memoEditRequest, memoRemoveRequest } from '../actions/memo';
+import {
+    memoPostRequest, memoListRequest,
+    memoEditRequest, memoRemoveRequest,
+    memoStarRequest
+} from '../actions/memo';
 import './Home.css';
 
 const Materialize = window.Materialize;
@@ -84,7 +88,7 @@ class Home extends Component {
     loadNewMemo = () => {
         // CANCEL IF THERE IS A PENDING REQUEST
         if (this.props.listStatus === 'WAITING') {
-            console.log("================기 다 려=================");
+            console.log("========= Server is working to load memoList =========");
             return new Promise((resolve, reject) => {
                 resolve();
             })
@@ -98,7 +102,6 @@ class Home extends Component {
 
 
         return this.props.memoListRequest(false, 'new', this.props.memoData.get('data').get(0).get('_id'));
-        // return this.props.memoListRequest(true);
     }
 
     // 오래된 메모 불러오기
@@ -113,9 +116,6 @@ class Home extends Component {
         }
 
         // GET ID OF THE MEMO AT THE BOTTOM
-        // let lastId = this.props.memoData.get('data')[this.props.memoData.get('data').length - 1]._id;
-        console.log("마지막 글 : ", this.props.memoData.get('data'));
-        // console.log("가장 마지막 글 : ", this.props.memoData.get('data').get(0).get('_id'));
         let lastId = this.props.memoData.get('data').get(this.props.memoData.get('data').size - 1).get('_id');
 
 
@@ -129,8 +129,9 @@ class Home extends Component {
     }
 
 
-
+    // *******************************************
     // 로그아웃
+    // ********************************************
     handleLogout = () => {
         this.props.logoutRequest()
             .then(() => {
@@ -147,7 +148,9 @@ class Home extends Component {
     }
 
 
+    // **************************************
     // 메모 쓰기
+    // **************************************
     handlePost = (contents) => {
         return this.props.memoPostRequest(contents).then(() => {
             if (this.props.postStatus.get('status') === 'SUCCESS') {
@@ -196,12 +199,12 @@ class Home extends Component {
                     Materialize.toast('Success!', 2000);
                 } else {
                     /*
-                         ERROR CODES
-                             1: INVALID ID,
-                             2: EMPTY CONTENTS
-                             3: NOT LOGGED IN
-                             4: NO RESOURCE
-                             5: PERMISSION FAILURE
+                        ERROR CODES
+                            1: INVALID ID,
+                            2: EMPTY CONTENTS
+                            3: NOT LOGGED IN
+                            4: NO RESOURCE
+                            5: PERMISSION FAILURE
                      */
                     let errorMessage = [
                         'Something broke',
@@ -226,9 +229,9 @@ class Home extends Component {
         )
     }
 
-    /**
-     * 메모 삭제 핸들러
-     */
+    // *****************************************************
+    // 메모 삭제
+    // *****************************************************
     handleRemove = (id, index) => {
         this.props.memoRemoveRequest(id, index).then(() => {
             if (this.props.removeStatus.get('status') === 'SUCCESS') {
@@ -269,6 +272,42 @@ class Home extends Component {
         })
     }
 
+    // *******************************************************
+    // 메모 삭제 - id : 글의 아이디, index : data배열의 인덱스
+    // *******************************************************
+    handleStar = (id, index) => {
+        this.props.memoStarRequest(id, index).then(
+            () => {
+                if (this.props.starStatus.get('status') !== 'SUCCESS') {
+                    /*
+                        TOGGLES STAR OF MEMO: POST /api/memo/star/:id
+                        ERROR CODES
+                            1: INVALID ID
+                            2: NOT LOGGED IN
+                            3: NO RESOURCE
+                    */
+                    let errorMessage = [
+                        'Something broke',
+                        'You are not logged in',
+                        'That memo does not exist'
+                    ];
+
+
+                    // NOTIFY ERROR
+                    let $toastContent = $('<span style="color: #FFB4BA">' + errorMessage[this.props.starStatus.get('error') - 1] + '</span>');
+                    Materialize.toast($toastContent, 2000);
+
+
+                    // IF NOT LOGGED IN, REFRESH THE PAGE
+                    // 클라이언트에서는 로그인 상태였지만 서버에선 비로그인상태일 때
+                    if (this.props.starStatus.get('error') === 2) {
+                        setTimeout(() => { window.location.reload(false) }, 2000);
+                    }
+                }
+            }
+        )
+    }
+
     render() {
 
         const { data } = this.props.memoData.toJS();
@@ -283,6 +322,7 @@ class Home extends Component {
                         currentUser={this.props.currentUser}
                         onEdit={this.handleEdit}
                         onRemove={this.handleRemove}
+                        onStar={this.handleStar}
                     />
                 </div>
             </div>
@@ -299,7 +339,8 @@ const mapStateToProps = (state) => {
         listStatus: state.memo.getIn(['memoList', 'status']),
         isLast: state.memo.getIn(['memoList', 'isLast']),
         editStatus: state.memo.get('edit'),
-        removeStatus: state.memo.get('remove')
+        removeStatus: state.memo.get('remove'),
+        starStatus: state.memo.get('star')
     }
 }
 
@@ -319,6 +360,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         memoRemoveRequest: (id, index) => {
             return dispatch(memoRemoveRequest(id, index));
+        },
+        memoStarRequest: (id, index) => {
+            return dispatch(memoStarRequest(id, index));
         }
     }
 }
