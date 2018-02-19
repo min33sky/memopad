@@ -1,11 +1,16 @@
 import React, { Component } from 'react';
 import { Header, Write, MemoList } from '../components';
 import { connect } from 'react-redux';
+
+// SERVER API를 호출할 함수
 import { logoutRequest } from '../actions/authentication';
 import {
     memoPostRequest, memoListRequest,
     memoEditRequest, memoRemoveRequest, memoStarRequest
 } from '../actions/memo';
+import { searchRequest } from '../actions/search';
+
+// propType module
 import PropTypes from 'prop-types';
 import './Home.css';
 
@@ -88,7 +93,7 @@ class Home extends Component {
         })
     }
 
-    // 담벼락(Wall)에서 검색시 홈 컴포넌트가 다시 마운트되지 않고 업데이트되므로
+    // 담벼락(Wall)에서는 홈 컴포넌트가 다시 마운트되지 않고 업데이트되므로
     // 직접 메서드를 실행하기 위한 코드이다
     componentDidUpdate(prevProps, prevState) {
         if(this.props.username !== prevProps.username) {
@@ -175,7 +180,8 @@ class Home extends Component {
                     username: ''
                 };
 
-                document.cookie = 'key=' + btoa(JSON.stringify(loginData));
+                // document.cookie = 'key=' + btoa(JSON.stringify(loginData));
+                document.cookie = `key=${btoa(JSON.stringify(loginData))}; path=/`;
             });
     }
 
@@ -340,6 +346,18 @@ class Home extends Component {
         )
     }
 
+    /**
+     * 사용자 검색 핸들러
+     */
+    handleSearch = (keyword) => {
+        // implemented
+        this.props.searchRequest(keyword);
+    }
+
+    // ****************************************************************
+    // 랜더링
+    // ****************************************************************
+
     render() {
 
         const { data } = this.props.memoData.toJS();
@@ -358,9 +376,9 @@ class Home extends Component {
         const wallHeader = (
             <div>
                 <div className="container wall-info">
-                    <div className="card wall-info indigo lighten-2 white-text">
+                    <div className="card wall-info indigo darken-1 white-text">
                         <div className="card-content">
-                            작성자 : {this.props.username}
+                            {this.props.username} 님의 담벼락
                         </div>
                     </div>
                 </div>
@@ -371,7 +389,11 @@ class Home extends Component {
 
         return (
             <div>
-                <Header isLoggedIn={this.props.isLoggedIn} onLogout={this.handleLogout} />
+                <Header
+                    onSearch={this.handleSearch}
+                    usernames={this.props.usernames.toJS()}
+                    isLoggedIn={this.props.isLoggedIn}
+                    onLogout={this.handleLogout} />
                 <div className="wrapper">
                     { typeof this.props.username !== 'undefined' ? wallHeader : undefined }
                     {this.props.isLoggedIn && typeof this.props.username === 'undefined' ? write : undefined}
@@ -407,7 +429,8 @@ const mapStateToProps = (state) => {
         isLast: state.memo.getIn(['memoList', 'isLast']),
         editStatus: state.memo.get('edit'),
         removeStatus: state.memo.get('remove'),
-        starStatus: state.memo.get('star')
+        starStatus: state.memo.get('star'),
+        usernames: state.search.get('usernames')
     }
 }
 
@@ -430,6 +453,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         memoStarRequest: (id, index) => {
             return dispatch(memoStarRequest(id, index));
+        },
+        searchRequest: (keyword) => {
+            return dispatch(searchRequest(keyword));
         }
     }
 }

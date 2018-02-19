@@ -1,0 +1,57 @@
+@-webkit-keyframes search-enter {
+    0% {
+        opacity: 0;
+        height: 0%;
+    }
+    100% {
+        opacity: 1;
+        height: 100%;
+    }
+}
+
+@keyframes search-enter {
+    0% {
+        opacity: 0;
+        height: 0%;
+    }
+    100% {
+        opacity: 1;
+        height: 100%;
+    }
+}
+
+@-webkit-keyframes search-leave {
+    0% {
+        opacity: 1;
+        height: 100%;
+    }
+    100% {
+        opacity: 0;
+        height: 0%;
+    }
+}
+
+@keyframes search-leave {
+    0% {
+        opacity: 1;
+        height: 100%;
+    }
+    100% {
+        opacity: 0;
+        height: 0%;
+    }
+}
+
+.search-enter {
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-name: search-enter;
+    animation-name: search-enter;
+}
+
+.search-leave {
+    -webkit-animation-duration: 0.3s;
+    animation-duration: 0.3s;
+    -webkit-animation-name: search-leave;
+    animation-name: search-leave;
+}

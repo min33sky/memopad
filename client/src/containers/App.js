@@ -13,18 +13,16 @@ class App extends Component {
    */
   componentDidMount() {
 
-
-    // GET COOKIE BY NAME
+    // get cookie by name
     function getCookie(name) {
-      var value = "; " + document.cookie;
+      var value = "; " + document.cookie.split(';');
       var parts = value.split("; " + name + "=");
-
       if (parts.length === 2) return parts.pop().split(";").shift();
     }
 
+
     // get LoginData from cookie
     let loginData = getCookie('key');
-
 
     // if LoginData is undefined, do nothing
     if(typeof loginData === 'undefined') return;

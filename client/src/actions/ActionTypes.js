@@ -60,3 +60,12 @@ export const MEMO_REMOVE_FAILURE = "MEMO_REMOVE_FAILURE";
 export const MEMO_STAR = "MEMO_STAR";
 export const MEMO_STAR_SUCCESS = "MEMO_STAR_SUCCESS";
 export const MEMO_STAR_FAILURE = "MEMO_STAR_FAILURE";
+
+
+// ************************************************************************
+// 사용자 검색 액션
+// ************************************************************************
+
+export const SEARCH = "SEARCH";
+export const SEARCH_SUCCESS = "SEARCH_SUCCESS";
+export const SEARCH_FAILURE = "SEARCH_FAILURE";

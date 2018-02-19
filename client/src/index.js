@@ -14,7 +14,7 @@ import thunk from 'redux-thunk';
 
 import registerServiceWorker from './registerServiceWorker';
 
-// store 생성
+// store 생성 (리듀서 함수, 미들웨어, (파이어폭스/크롬)리덕스 도구관련 )
 const store = createStore(reducers, compose(applyMiddleware(thunk), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()) );
 
 const Root = () => (

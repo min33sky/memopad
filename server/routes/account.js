@@ -80,9 +80,6 @@ router.post('/signin', (req, res) => {
     Account.findOne({ username: req.body.username }, (err, account) => {
         if(err) throw err;
 
-        console.log("ggggggggggggg");
-
-
         // CHECK ACCOUNT EXISTANCY
         if(!account) {
             console.log("===== 해당 계정이 없다 =====");
@@ -135,6 +132,28 @@ router.get('/getinfo', (req, res) => {
 router.post('/logout', (req, res) => {
     req.session.destroy(err => { if(err) throw err; });
     return res.json({ success: true });
+})
+
+/*
+    사용자 검색 API
+    Search USER: GET /api/account/search/:username
+*/
+router.get('/search/:username', (req, res) => {
+    // SEARCH USERNAMES THAT STARTS WITH GIVEN KEYWORD USING REGEX
+    // username으로 시작하는 사용자 5개를 검색해 _id는 제외하고 username만 보여준다
+    var re = new RegExp('^' + req.params.username);
+    Account.find({username: {$regex: re}}, {_id: false, username: true})
+            .limit(5)
+            .sort({username: 1})
+            .exec((err, accounts) => {
+                if(err) throw err;
+                return res.json(accounts);
+            });
+});
+
+// EMPTY SEARCH REQUEST: GET /api/account/search
+router.get('/search', (req, res) => {
+    res.json([]);
 })
 
 export default router;

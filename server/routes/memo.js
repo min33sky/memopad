@@ -314,7 +314,7 @@ router.post('/star/:id', (req, res) => {
 });
 
 /**
-    특정 유저 메모 검색
+    특정 유저 메모 읽어들이기 (담벼락)
     READ MEMO OF A USER: GET /api/memo/:username
  */
 router.get('/:username', (req, res) => {

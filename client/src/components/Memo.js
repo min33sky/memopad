@@ -34,6 +34,12 @@ class Memo extends Component {
         $(`#dropdown-button-` + this.props.data._id).dropdown({
             beloworigin: true // Display dropdown below the button
         });
+
+        if(this.state.editMode) {
+            // Trigger key up event to the edit input so that it auto-resizes (Materializecss Feature)
+            // 내용이 3줄 이상일 때 전체 출력이 안되는것을 해결한다.
+            $(this.input).keyup();
+        }
     }
 
     // 상태가 바뀔 때만 렌더링 처리
@@ -167,6 +173,7 @@ class Memo extends Component {
                 <div className="card">
                     <div className="card-content">
                         <textarea
+                            ref={ ref => { this.input = ref; }}
                             className="materialize-textarea"
                             value={this.state.value}
                             onChange={this.handleChange}>

@@ -22,6 +22,7 @@ mongoose.connect('mongodb://localhost/memopad');
 
 // use session
 app.use(session({
+    name: 'session',
     secret: 'min33sky@h!a!',
     resave: false,
     saveUninitialized: true

@@ -20,10 +20,11 @@ class Login extends Component {
                     };
 
                     // btoa : base64 인코딩 함수
-                    document.cookie = 'key=' + btoa(JSON.stringify(loginData));
+                    // document.cookie = 'key=' + btoa(JSON.stringify(loginData));
+                    document.cookie = `key=${btoa(JSON.stringify(loginData))}; path=/`;
 
                     Materialize.toast('Welcome ' + id + '!', 2000);
-                    // 라우팅을 트리거(<Link>와 같은 효과)
+                    // 라우팅을 트리거(<Link>와 같은 효과) (리액트라우터 이전버전 : browserHistory)
                     this.props.history.push('/');
                     return true;
                 } else {
